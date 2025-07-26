@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>ISSO Terminal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+    body {
+      margin: 0;
+      background-color: black;
+      color: white;
+      font-family: 'Share Tech Mono', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      opacity: 0;
+      animation: fadeInMain 1s ease 3s forwards;
+      position: relative;
+    }
+
+    .ISSO {
+      width: 200px;
+      filter: brightness(1000%) contrast(1000%);
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1rem;
+      font-weight: 300;
+      color: #eee;
+      margin-bottom: 5px;
+    }
+
+    .coordinates p {
+      margin: 3px 0;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      color: #ccc;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      margin-top: 20px;
+      gap: 10px;
+      width: 220px;
+    }
+
+    .login-form input {
+      padding: 10px;
+      background-color: black;
+      border: 1px solid white;
+      color: white;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      outline: none;
+      caret-color: white;
+      box-shadow: 0 0 4px white inset;
+    }
+
+    .login-form input::placeholder {
+      color: #888;
+      opacity: 0.5;
+    }
+
+    .login-form button {
+      padding: 10px;
+      background-color: black;
+      color: white;
+      border: 1px solid white;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 0 4px white;
+      transition: all 0.2s ease;
+    }
+
+    .login-form button:hover {
+      background-color: #111;
+      box-shadow: 0 0 8px white;
+      color: white;
+    }
+
+    #boot-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      color: white;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1s ease;
+    }
+
+    #boot-screen.show {
+      opacity: 1;
+      visibility: visible;
+      animation: bootFadeOut 1s ease 2.5s forwards;
+    }
+
+    .typewriter {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid white;
+      font-size: 1.2rem;
+      animation: typing 2.5s steps(40, end) forwards;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes bootFadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    @keyframes fadeInMain {
+      to { opacity: 1; }
+    }
+
+    #error-message {
+      position: absolute;
+      top: -30px;
+      color: #ff5555;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      user-select: none;
+      opacity: 1;
+      transition: opacity 2s ease;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="boot-screen">
+    <div class="typewriter">[BOOTING] Initializing ISSO Terminal... █</div>
+  </div>
+
+  <div class="container">
+    <img src="/static/ISSO.png" alt="ISSO" class="ISSO" />
+    <p class="tagline">"If it cannot be undone, make it as if it never happened."</p>
+    
+    <!-- https://docs.google.com/document/d/1iDw021vIWrj7Rck8cDXjFC5SWmECOHNuUQRhC4pqWTw/edit?usp=sharing -->
+
+    <div class="coordinates">
+      <p>48.8584° N, 2.2945° E</p>
+      <p>40.6892° N, -74.0445° W</p>
+      <p>51.5055° N, -0.0754° W</p>
+      <p>35.6586° N, 139.7454° E</p>
+      <p>-22.9519° S, -43.2105° W</p>
+    </div>
+
+    <!-- 히든 메시지 -->
+    <!--해당 페이지의 쿠키에는 숨겨진 히든 ID가 포함되어 있습니다.-->
+
+    <form class="login-form" action="/login" method="POST">
+      <input type="text" name="id" placeholder="AGENT ID" required />
+      <input type="password" name="pw" placeholder="ACCESS KEY" required />
+      <button type="submit">INITIATE ACCESS</button>
+    </form>
+    <div id="error-message">ACCESS DENIED Invalid credentials</div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('error') === '1') {
+      const errorEl = document.getElementById('error-message');
+      errorEl.style.display = 'block';
+      errorEl.style.opacity = '1'; 
+      
+      setTimeout(() => {
+        errorEl.style.opacity = '0';
+      }, 5000);
+
+      setTimeout(() => {
+        errorEl.style.display = 'none';
+      }, 7000);
+    }
+
+    if (params.get('error') !== '1') {
+      const bootScreen = document.getElementById('boot-screen');
+      bootScreen.classList.add('show');
+    }
+  </script>
+</body>
+</html>

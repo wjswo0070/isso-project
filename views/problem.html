@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Agent Terminal</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: 'Share Tech Mono', monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .terminal {
+      background-color: #000;
+      border: 1px solid #888;
+      padding: 30px;
+      width: 600px;
+      max-width: 90%;
+      box-shadow: 0 0 8px #aaa;
+    }
+
+    .typewriter-text {
+      white-space: pre;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .blinking-cursor::after {
+      content: '|';
+      animation: blink 1s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .timer {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1rem;
+    }
+
+    .file-download {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .file-download a {
+      color: #fff;
+      text-decoration: underline;
+      font-size: 1.1rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    input[type="text"] {
+      background: black;
+      border: 1px solid #ccc;
+      color: white;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    button {
+      background: black;
+      color: white;
+      border: 1px solid white;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    label {
+      color: #ccc;
+    }
+
+    #error-message {
+      color: #ff4444;
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <h1><span class="typewriter-text" id="typedText"></span><span class="blinking-cursor"></span></h1>
+
+    <div class="timer">
+      TIME LEFT: <span id="timer">Loading...</span>
+    </div>
+
+    <div class="file-download">
+      <a href="/download">문제 파일 다운로드</a>
+    </div>
+
+    <form action="/submit-answer" method="POST">
+      <label for="answer">ENTER CODE:</label>
+      <input type="text" id="answer" name="answer" required autocomplete="off" />
+      <button type="submit">SUBMIT</button>
+    </form>
+
+    <div id="error-message">WRONG ANSWER. TRY AGAIN.</div>
+  </div>
+
+  <script>
+    const text = ">> 2FA Protocol - Come up with it.";
+    const typedText = document.getElementById("typedText");
+    let i = 0;
+
+    function typeNext() {
+      if (i < text.length) {
+        typedText.textContent += text.charAt(i);
+        i++;
+        setTimeout(typeNext, 70);
+      }
+    }
+
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';')[0];
+      return null;
+    }
+
+    function setBanCookie() {
+      const d = new Date();
+      d.setFullYear(d.getFullYear() + 10);
+      document.cookie = "banned=true; expires=" + d.toUTCString() + "; path=/";
+    }
+
+    function updateTimer() {
+      const loginTimeStr = getCookie('loginTime');
+      if (!loginTimeStr) {
+        document.getElementById('timer').innerText = 'ERROR: NO TIMER';
+        return;
+      }
+
+      const loginTime = parseInt(loginTimeStr);
+      const END_TIME = loginTime + 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      const diff = END_TIME - now;
+
+      if (diff <= 0) {
+        document.getElementById('timer').innerText = 'TIME EXPIRED';
+        alert('Time expired. Session ended.');
+        setBanCookie();
+        window.location.href = '/expired';
+        return;
+      }
+
+      const h = Math.floor(diff / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+      document.getElementById('timer').innerText = `${h}h ${m}m ${s}s`;
+    }
+
+    function checkError() {
+      const error = getQueryParam('error');
+      if (error === '1') {
+        const errMsg = document.getElementById('error-message');
+        errMsg.style.display = 'block';
+      }
+    }
+
+    window.onload = () => {
+      typeNext();
+      checkError();
+      updateTimer();
+      setInterval(updateTimer, 1000);
+    };
+  </script>
+</body>
+</html>
