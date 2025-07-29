@@ -5,7 +5,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
-const net = require('net'); // TCP 사용을 위한 net 모듈 추가
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Render 환경변수 대응
@@ -35,19 +34,6 @@ app.use(session({
 function isExpired(req) {
   if (!req.session.loginTime) return true;
   return Date.now() - req.session.loginTime > SESSION_DURATION;
-}
-
-// TCP 메시지 전송 함수
-function sendTCPMessage(message, port = 5000, host = '127.0.0.1') {
-  const client = new net.Socket();
-  client.connect(port, host, () => {
-    client.write(message);
-    client.end();
-  });
-
-  client.on('error', err => {
-    console.error('❌ TCP 메시지 전송 중 오류:', err.message);
-  });
 }
 
 // 로그인 페이지
@@ -85,9 +71,6 @@ app.get('/problem', (req, res) => {
     httpOnly: false,
     maxAge: SESSION_DURATION
   });
-
-  // ✅ TCP 메시지 전송
-  sendTCPMessage('0700으로 시작하는 조합');
 
   res.redirect('/problem-page');
 });
@@ -148,18 +131,6 @@ app.get('/logout', (req, res) => {
 // 만료 페이지
 app.get('/expired', (req, res) => {
   res.send('<h1>ACCESS BLOCKED</h1><p>You are no longer allowed to access this server.</p>');
-});
-
-// ✅ TCP 수신 서버 (패킷 확인용)
-const tcpServer = net.createServer(socket => {
-  console.log('✅ TCP 클라이언트 연결됨');
-  socket.on('data', data => {
-    console.log('📨 받은 메시지:', data.toString());
-  });
-});
-
-tcpServer.listen(5000, () => {
-  console.log('📡 TCP 수신 서버: 포트 5000에서 대기 중');
 });
 
 // 서버 시작
